@@ -1456,7 +1456,7 @@ function drawAll() {
 
   g_modelMatrix.setTranslate(-planet2x*0.85,-planet2y*0.4,-planet2z);
   //g_modelMatrix.setTranslate(-0.7,0,0);
-  g_modelMatrix.scale(0.3, 0.3, 0.3);
+  //g_modelMatrix.scale(0.3, 0.3, 0.3);
   g_modelMatrix.rotate(12, 1, 1, 1);  // Make new drawing axes that 
   g_modelMatrix.rotate(g_angle03*0.5, 1, 0, 1); 
 
