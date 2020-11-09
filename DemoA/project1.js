@@ -1854,7 +1854,7 @@ function myKeyDown(kev) {
 			console.log("a/A key: Strafe LEFT!\n");
 			
 			break;
-    case "KeyD":
+    	case "KeyD":
 			console.log("d/D key: Strafe RIGHT!\n");
 			
 			break;
