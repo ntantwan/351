@@ -6,8 +6,16 @@
   </head>
 	<!--	Create the HTML5 'canvas' element in which we will run WebGL
 	-->
-  <body onload="main()">
-    <canvas id="webgl" width="600" height="600">
+
+	<script>
+		function getWidth() {
+			console.log(screen.width)
+			return screen.width;
+		}
+	</script>
+
+  <body onload="main()" onresize="drawResize()">
+	<canvas id="webgl" width="getWidth()" height="600">
     Please use a browser that supports "canvas"
     </canvas>
 	<p>
@@ -18,18 +26,33 @@
 	<div id= ShapeName></div> 
 	<!-- Fill this HTML tag with JavaScript-generated text that names the shape displayed
 	To change shapes, users press the 'Next' button, which calls the 'nextShape()' function-->
-	Displayed Shape: 
 	<!--
-	-->	<button type="button" onClick='nextShape()'>Next</button><BR> 
 
 		<!--BUTTONS: commands below create HTML push-buttons with labels
 			Spin <<, runStop, and Spin >>.  
 		When users click the button, HTML calls JavaScript functions
 			"spinDown()", "runStop()" and "spinUp()"   -->
+			
+			<center>
+				<b>Press Spin << or >> to change the spinning speed of the sphere!</b>
+				<br>
+				<b>Press Run/Stop to pause the objects from spinning.</b>
+				<br>
       <button type="button" onclick="spinDown()">Spin << </button>
 	  <button type="button" onclick="runStop()">Run/Stop</button>
-      <button type="button" onclick="spinUp()">Spin >> </button>
-    </p>
+	  <button type="button" onclick="spinUp()">Spin >> </button>
+			</center>
+	  <br>
+	  <b><center>Drag the mouse to rotate the satellite around!
+	  <br> <br>
+	  Press WASD to move the camera around the screen!
+	  <br> 
+	  Press Up/Down/Left/Right Arrow Keys to change where you are looking!</b>
+	  <br><br><br>
+
+	  <i>Note: The red axis is X, the green axis is Y, and the blue axis is Z.</i></center>
+
+	</p>
 	<!--	Load in the JavaScript libraries supplied by our textbook 
 			(Matsuda et al., 2013 WebGL Programming Guide) that help us
 			with WebGL programming:

@@ -17,6 +17,12 @@
 //
 // Vertex shader program----------------------------------
 
+var gl
+var g_canvas = document.getElementById('webgl');  // Retrieve HTML <canvas> element
+var n
+var modelMatrix
+var u_ModelMatrix
+
 var VSHADER_SOURCE = 
   'uniform mat4 u_ModelMatrix;\n' +
   'attribute vec4 a_Position;\n' +
@@ -49,8 +55,8 @@ var angle1rate = 45.0
 cameraX = 5
 cameraY = 5
 cameraZ = 3
-lookX = -1
-lookY = -2
+lookX = -7
+lookY = -9
 lookZ = -5
 												
 sphere = [
@@ -1598,6 +1604,272 @@ boat1 = [
 	0.5, 0.0, 0.5, 1.0, 0.5,0.2,0.2
 ]
 
+axes = [
+	0.0,  0.0,  0.0, 1.0,		0.3,  0.3,  0.3,	// X axis line (origin: gray)
+	1.3,  0.0,  0.0, 1.0,		1.0,  0.3,  0.3,	// 						 (endpoint: red)
+	
+	0.0,  0.0,  0.0, 1.0,    0.3,  0.3,  0.3,	// Y axis line (origin: white)
+	0.0,  1.3,  0.0, 1.0,		0.3,  1.0,  0.3,	//						 (endpoint: green)
+
+	0.0,  0.0,  0.0, 1.0,		0.3,  0.3,  0.3,	// Z axis line (origin:white)
+	0.0,  0.0,  1.3, 1.0,		0.3,  0.3,  1.0,	//	
+]
+
+var tube1 = 0.1;
+var tube2 = 0.2;	
+var tube3 = 0.1;	
+var tube4 = 0.2;	
+var tube5 = 0.03;	
+
+sat = [
+	0, 0, 0, 1,         0.4, 0.4, 0.4,
+		0, 0, tube1, 1,       0.2, 0.2, 0.2,
+		tube1, 0, tube1, 1,     0.9, 0.9, 0.9,
+		0, 0, 0, 1,         0.4, 0.4, 0.4,
+		tube1, 0, tube1, 1,     0.2, 0.2, 0.2,
+		tube1, 0, 0, 1,       0.9, 0.9, 0.9,
+
+		0, tube2, 0, 1,         0.4, 0.4, 0.4,
+		0, tube2, tube1, 1,       0.2, 0.2, 0.2,
+		tube1, tube2, tube1, 1,     0.9, 0.9, 0.9,
+		0, tube2, 0, 1,         0.4, 0.4, 0.4,
+		tube1, tube2, tube1, 1,     0.2, 0.2, 0.2,
+		tube1, tube2, 0, 1,       0.9, 0.9, 0.9,
+
+		0, 0, tube1, 1,         0.4, 0.4, 0.4,
+		0, tube2, tube1, 1,       0.2, 0.2, 0.2,
+		0, 0, 0, 1,     0.9, 0.9, 0.9,
+		0, tube2, tube1, 1,       0.4, 0.4, 0.4,
+		0, 0, 0, 1,     0.2, 0.2, 0.2,
+		0, tube2, 0, 1,       0.9, 0.9, 0.9,
+
+		tube1, 0, tube1, 1,         0.4, 0.4, 0.4,
+		tube1, tube2, tube1, 1,       0.2, 0.2, 0.2,
+		tube1, 0, 0, 1,     0.9, 0.9, 0.9,
+		tube1, tube2, tube1, 1,       0.4, 0.4, 0.4,
+		tube1, 0, 0, 1,     0.2, 0.2, 0.2,
+		tube1, tube2, 0, 1,       0.9, 0.9, 0.9,
+
+		0,0,tube1,1,0.4, 0.4, 0.4,
+		tube1,0,tube1,1,0.2, 0.2, 0.2,
+		0,tube2,tube1,1,0.9, 0.9, 0.9,
+		0,tube2,tube1,1,0.4, 0.4, 0.4,
+		tube1,0,tube1,1,0.2, 0.2, 0.2,
+		tube1,tube2,tube1,1,0.9, 0.9, 0.9,
+
+		0,0,0,1,0.4, 0.4, 0.4,
+		tube1,0,0,1,0.2, 0.2, 0.2,
+		0,tube2,0,1,0.9, 0.9, 0.9,
+		0,tube2,0,1,0.4, 0.4, 0.4,
+		tube1,0,0,1,0.2, 0.2, 0.2,
+		tube1,tube2,0,1,0.9, 0.9, 0.9,
+]
+
+sat2 = [
+	0, 0, 0, 1,         0.588, 0.894, 0.922,
+		0, 0, tube5, 1,       0.243, 0.365, 0.612,
+		tube3, 0, tube5, 1,     0.500, 0.500, 0.500,
+		0, 0, 0, 1,         0.588, 0.894, 0.922,
+		tube3, 0, tube5, 1,     0.2, 0.2, 0.4,
+		tube3, 0, 0, 1,       0.500, 0.500, 0.500,
+
+		0, tube4, 0, 1,        0.588, 0.894, 0.922,
+		0, tube4, tube5, 1,      0.243, 0.365, 0.612,
+		tube3, tube4, tube5, 1,     0.500, 0.500, 0.500,
+		0, tube4, 0, 1,         0.243, 0.365, 0.612,
+		tube3, tube4, tube5, 1,     0.500, 0.500, 0.500,
+		tube3, tube4, 0, 1,       0.588, 0.894, 0.922,
+
+		0, 0, tube5, 1,         0.500, 0.500, 0.500,
+		0, tube4, tube5, 1,       0.588, 0.894, 0.922,
+		0, 0, 0, 1,     0.243, 0.365, 0.612,
+		0, tube4, tube5, 1,       0.588, 0.894, 0.922,
+		0, 0, 0, 1,     0.500, 0.500, 0.500,
+		0, tube4, 0, 1,       0.243, 0.365, 0.612,
+
+		tube3, 0, tube5, 1,         0.588, 0.894, 0.922,
+		tube3, tube4, tube5, 1,       0.500, 0.500, 0.500,
+		tube3, 0, 0, 1,     0.243, 0.365, 0.612,
+		tube3, tube4, tube5, 1,       0.500, 0.500, 0.500,
+		tube3, 0, 0, 1,     0.243, 0.365, 0.612,
+		tube3, tube4, 0, 1,       0.588, 0.894, 0.922,
+
+		0,0,tube5,1,0.243, 0.365, 0.612,
+		tube3,0,tube5,1,0.500, 0.500, 0.500,
+		0,tube4,tube5,1,0.588, 0.894, 0.922,
+		0,tube4,tube5,1,0.500, 0.500, 0.500,
+		tube3,0,tube5,1,0.588, 0.894, 0.922,
+		tube3,tube4,tube5,1,0.243, 0.365, 0.612,
+
+		0,0,0,1,0.243, 0.365, 0.612,
+		tube3,0,0,1,0.588, 0.894, 0.922,
+		0,tube4,0,1,0.500, 0.500, 0.500,
+		0,tube4,0,1,0.500, 0.500, 0.500,
+		tube3,0,0,1,0.243, 0.365, 0.612,
+		tube3,tube4,0,1,0.588, 0.894, 0.922,
+]
+
+box = [
+	-1.0,1.0,0.0,1.0, 0.5,0.5,0.5,
+	-0.75,1.0,0.0,1.0, 0.35,0.35,0.35,
+	-0.75,1.0,0.3,1.0, 0.2,0.2,0.2,
+
+	-1.0,1.0,0.0,1.0, 0.5,0.5,0.5,
+	-1.0,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-0.75,1.0,0.3,1.0, 0.2,0.2,0.2,
+	
+	-1.0,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-0.9375,1.0,0.3,1.0, 0.2,0.2,0.2,
+	-0.9375,1.0,0.5,1.0, 0.2,0.2,0.2,
+	
+	-1.0,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-1.0,1.0,0.5,1.0, 0.4,0.4,0.4,
+	-0.9375,1.0,0.5,1.0, 0.2,0.2,0.2,
+	
+	-0.75,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-0.8125,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-0.8125,1.0,0.5,1.0, 0.2,0.2,0.2,
+
+	-0.75,1.0,0.3,1.0, 0.4,0.4,0.4,
+	-0.75,1.0,0.5,1.0, 0.4,0.4,0.4,
+	-0.8125,1.0,0.5,1.0, 0.2,0.2,0.2,
+	
+	// Wall 1
+	-1.0,1.0,0.5,1.0, 0.5,0.5,0.5,
+	-1.0,0.0,0.5,1.0, 0.7,0.7,0.7,
+	-0.9375,1.0,0.5,1.0, 0.35,0.35,0.35,
+		
+	-0.9375,1.0,0.5,1.0, 0.35,0.35,0.35,
+	-1.0,0.0,0.5,1.0, 0.7,0.7,0.7,
+	-0.9375,0.0,0.5,1.0, 0.5,0.9,0.3,
+
+	-0.75,1.0,0.5,1.0, 0.5,0.5,0.5,
+	-0.75,0.0,0.5,1.0, 0.7,0.7,0.7,
+	-0.8125,1.0,0.5,1.0, 0.35,0.35,0.35,
+		
+	-0.8125,1.0,0.5,1.0, 0.35,0.35,0.35,
+	-0.75,0.0,0.5,1.0, 0.7,0.7,0.7,
+	-0.8125,0.0,0.5,1.0, 0.5,0.9,0.3,
+	
+	
+	// Wall 2
+	-1.0,1.0,0.0,1.0, 0.5,0.5,0.5,
+	-1.0,0.0,0.0,1.0, 0.7,0.7,0.7,
+	-0.75,1.0,0.0,1.0, 0.35,0.35,0.35,
+		
+	-0.75,1.0,0.0,1.0, 0.35,0.35,0.35,
+	-1.0,0.0,0.0,1.0, 0.7,0.7,0.7,
+	-0.75,0.0,0.0,1.0, 0.5,0.9,0.3,
+	
+	// Bottom
+	-1.0,0.0,0.0,1.0, 0.5,0.5,0.5,
+	-0.75,0.0,0.0,1.0, 0.35,0.35,0.35,
+	-0.75,0.0,0.5,1.0, 0.2,0.2,0.2,
+
+	-1.0,0.0,0.0,1.0, 0.5,0.5,0.5,
+	-1.0,0.0,0.5,1.0, 0.4,0.4,0.4,
+	-0.75,0.0,0.5,1.0, 0.2,0.2,0.2,
+	
+	// Sides
+	
+	-1.0,1.0,0.0,1.0, 0.5,0.9,0.5,
+	-1.0,0.0,0.0,1.0, 0.9,0.4,0.4,
+	-1.0,0.0,0.5,1.0, 0.2,0.2,0.9,
+
+	-1.0,1.0,0.5,1.0, 0.5,0.9,0.9,
+	-1.0,1.0,0.0,1.0, 0.9,0.9,0.4,
+	-1.0,0.0,0.5,1.0, 0.9,0.2,0.9,
+	
+	-0.75,1.0,0.0,1.0, 0.5,0.5,0.5,
+	-0.75,0.0,0.0,1.0, 0.5,0.4,0.5,
+	-0.75,0.0,0.5,1.0, 0.2,0.5,0.2,
+
+	-0.75,1.0,0.5,1.0, 0.5,0.5,0.5,
+	-0.75,1.0,0.0,1.0, 0.4,0.5,0.4,
+	-0.75,0.0,0.5,1.0, 0.5,0.2,0.5,
+	
+	
+	
+	// Flip Part
+
+	// Front
+	-0.9375,1.0,0.5,1.0, 0.35,0.7,0.35,
+	-0.8125,1.0,0.5,1.0, 0.2,0.7,0.7,
+	-0.9375,0.2,0.5,1.0, 0.9,0.9,0.2,
+
+	-0.8125,1.0,0.5,1.0, 0.35,0.7,0.1,
+	-0.8125,0.2,0.5,1.0, 0.2,0.1,0.7,
+	-0.9375,0.2,0.5,1.0, 0.1,0.9,0.2,
+	
+	-0.9375,1.0,0.5,1.0, 0.35,0.7,0.35,
+	-0.8125,1.0,0.5,1.0, 0.2,0.7,0.7,
+	-0.8125,1.0,0.3,1.0, 0.2,0.7,0.7,
+
+	-0.8125,1.0,0.3,1.0, 0.2,0.7,0.7,
+	-0.9375,1.0,0.5,1.0, 0.35,0.7,0.35,
+	-0.9375,1.0,0.3,1.0, 0.35,0.7,0.35,
+
+	-0.9375,1.0,0.5,1.0, 0.35,0.7,0.35,
+	-0.9375,1.0,0.3,1.0, 0.35,0.7,0.35,
+	-0.9375,0.2,0.3,1.0, 0.35,0.7,0.35,
+	
+	-0.9375,0.2,0.3,1.0, 0.35,0.7,0.35,
+	-0.9375,0.2,0.5,1.0, 0.35,0.7,0.35,
+	-0.9375,1.0,0.5,1.0, 0.35,0.7,0.35,
+	
+	-0.8125,1.0,0.5,1.0, 0.2,0.7,0.7,
+	-0.8125,1.0,0.3,1.0, 0.2,0.7,0.7,
+	-0.8125,0.2,0.3,1.0, 0.2,0.7,0.7,
+
+	-0.8125,0.2,0.3,1.0, 0.2,0.7,0.7,
+	-0.8125,0.2,0.5,1.0, 0.2,0.7,0.7,
+	-0.8125,1.0,0.5,1.0, 0.2,0.7,0.7,
+
+	
+	// Inside 
+	-0.9375,0.0,0.5,1.0, 1,0,0,
+	-0.8125,0.0,0.5,1.0, 1,0.4,0.7,	
+	-0.8125,0.0,0.0,1.0, 1,0.8,0.42,
+	
+	-0.8125,0.0,0.0,1.0, 1,0.7,0.555,
+	-0.9375,0.0,0.0,1.0, 1,0.5,0.35,
+	-0.9375,0.0,0.5,1.0, 1,0.6,0.8,
+	
+	-0.9375,0.0,0.5,1.0, 0.345,0.51,0.6,
+	-0.9375,0.0,0.0,1.0, 0.54,0.21,0.7,	
+	-0.9375,0.2,0.0,1.0, 0.54,0.21,0.7,	
+
+	-0.9375,0.2,0.0,1.0, 0.345,0.51,0.6,
+	-0.9375,0.2,0.5,1.0, 0.54,0.21,0.7,	
+	-0.9375,0.0,0.5,1.0, 0.54,0.21,0.7,	
+		
+	-0.8125,0.0,0.5,1.0, 0.54,0.21,0.7,	
+	-0.8125,0.0,0.0,1.0, 0.88,0.91,0.42,
+	-0.8125,0.2,0.0,1.0, 0.88,0.91,0.42,
+		
+	-0.8125,0.2,0.0,1.0, 0.88,0.91,0.42,
+	-0.8125,0.2,0.5,1.0, 0.88,0.91,0.42,
+	-0.8125,0.0,0.5,1.0, 0.88,0.91,0.42,
+		
+	-0.9375,0.2,0.5,1.0, 0.345,1,0.6,
+	-0.8125,0.2,0.5,1.0, 0.88,1,0.42,
+	-0.9375,0.0,0.5,1.0, 0.54,1,0.7,	
+	
+	-0.9375,0.0,0.5,1.0, 0.54,1,0,	
+	-0.8125,0.0,0.5,1.0, 0.88,1,0,
+	-0.8125,0.2,0.5,1.0, 0.88,1,0
+]
+
+var isDrag=false;		// mouse-drag: true when user holds down mouse button
+var xMclik=0.0;			// last mouse button-down position (in CVV coords)
+var yMclik=0.0;   
+var xMdragTot=0.0;	// total (accumulated) mouse-drag amounts (in CVV coords).
+var yMdragTot=0.0;  
+
+var qNew = new Quaternion(0,0,0,1); // most-recent mouse drag's rotation
+var qTot = new Quaternion(0,0,0,1);	// 'current' orientation (made from qNew)
+var quatMatrix = new Matrix4();	
+
 function main() {
 	
 //==============================================================================
@@ -1605,7 +1877,7 @@ function main() {
   var canvas = document.getElementById('webgl');
 
   // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas);
+  gl = getWebGLContext(canvas);
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
@@ -1618,7 +1890,7 @@ function main() {
   }
 
   // 
-  var n = initVertexBuffer(gl);
+  n = initVertexBuffer(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
@@ -1635,6 +1907,10 @@ function main() {
 //	gl.depthFunc(gl.LESS);			 // WebGL default setting: (default)
 	gl.enable(gl.DEPTH_TEST); 	 
 	 
+	canvas.onmousedown	=	function(ev){myMouseDown( ev, gl, canvas) }; 
+	canvas.onmousemove = 	function(ev){myMouseMove( ev, gl, canvas) };
+	canvas.onmouseup = 		function(ev){myMouseUp(   ev, gl, canvas)};
+
 //==============================================================================
 // STEP 4:   REMOVE This "reversed-depth correction"
 //       when you apply any of the 3D camera-lens transforms: 
@@ -1651,13 +1927,13 @@ function main() {
 //=====================================================================
 
   // Get handle to graphics system's storage location of u_ModelMatrix
-  var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
   if (!u_ModelMatrix) {
     console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
   // Create a local version of our model matrix in JavaScript 
-  var modelMatrix = new Matrix4();
+  modelMatrix = new Matrix4();
   
   // Create, init current rotation angle value in JavaScript
 
@@ -1673,7 +1949,11 @@ function main() {
     									// Request that the browser re-draw the webpage
   };
   tick();							// start (and continue) animation: draw current image
-    
+	
+  drawResize();   
+
+  
+
 }
 
 function initVertexBuffer(gl) {
@@ -1689,13 +1969,14 @@ function initVertexBuffer(gl) {
   
 
   // how many floats total needed to store all shapes?
-	var mySiz = (cylVerts.length + sphVerts.length + 
-							 torVerts.length + gndVerts.length
+	var mySiz = (gndVerts.length
 							 + sl1.length + sl2.length
 							 + sl3.length + sl4.length
 							 + sl5.length + spiral.length
 							 + spiral2.length + spiralsq.length
-							 + boat1.length);	
+							 + boat1.length + axes.length
+							 + sat.length + box.length
+							 + sat2.length);	
 
 	// How many vertices total?
 	var nn = (mySiz / floatsPerVertex);
@@ -1704,17 +1985,9 @@ function initVertexBuffer(gl) {
 
   var colorShapes = new Float32Array(mySiz);
 	// Copy them:  remember where to start for each shape:
-	cylStart = 0;							// we stored the cylinder first.
-  for(i=0,j=0; j< cylVerts.length; i++,j++) {
-  	colorShapes[i] = cylVerts[j];
-		}
-		sphStart = i;						// next, we'll store the sphere;
-	for(j=0; j< sphVerts.length; i++, j++) {// don't initialize i -- reuse it!
-		colorShapes[i] = sphVerts[j];
-		}
-		torStart = i;						// next, we'll store the torus;
-	for(j=0; j< torVerts.length; i++, j++) {
-		colorShapes[i] = torVerts[j];
+	boxStart = 0;							// we stored the cylinder first.
+  for(i=0,j=0; j< box.length; i++,j++) {
+  	colorShapes[i] = box[j];
 		}
 		gndStart = i;						// next we'll store the ground-plane;
 	for(j=0; j< gndVerts.length; i++, j++) {
@@ -1727,6 +2000,14 @@ function initVertexBuffer(gl) {
 		sl2Start = i;	
 	for(j=0; j< sl2.length; i++, j++) {
 			colorShapes[i] = sl2[j];
+		}
+		satStart = i;	
+	for(j=0; j< sat.length; i++, j++) {
+			colorShapes[i] = sat[j];
+		}
+		sat2Start = i;	
+	for(j=0; j< sat2.length; i++, j++) {
+			colorShapes[i] = sat2[j];
 		}
 		sl3Start = i;	
 	for(j=0; j< sl3.length; i++, j++) {
@@ -1744,6 +2025,10 @@ function initVertexBuffer(gl) {
 	for(j=0; j< spiral.length; i++, j++) {
 			colorShapes[i] = spiral[j];
 		}
+		axesStart = i;	
+	for(j=0; j< axes.length; i++, j++) {
+			colorShapes[i] = axes[j];
+		}
 		boatStart = i;	
 	for(j=0; j< boat1.length; i++, j++) {
 			colorShapes[i] = boat1[j];
@@ -1756,7 +2041,6 @@ function initVertexBuffer(gl) {
 	for(j=0; j< spiral.length; i++, j++) {
 			colorShapes[i] = spiralsq[j];
 		}
-		
 
 
   // Create a buffer object on the graphics hardware:
@@ -2207,8 +2491,6 @@ function drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
                         		??);  // camera z-far distance (always positive; frustum ends at z = -zfar)
 
 */
-modelMatrix.perspective(42, 1.0, 1.0, 1000.0)
-
 
 /*
 //  STEP 1:
@@ -2233,77 +2515,108 @@ modelMatrix.perspective(42, 1.0, 1.0, 1000.0)
                       ??, ??, ??,	// look-at point 
 					  ??, ??, ??);	// View UP vector.			  
 */
-modelMatrix.lookAt(cameraX,cameraY,cameraZ,
+
+gl.viewport(0, 
+	0,													// (x,y) location(in pixels)
+  g_canvas.width/2, 				// viewport width, height.
+  g_canvas.height);
+
+  var vpAspect = g_canvas.width/2 /			// On-screen aspect ratio for
+  (g_canvas.height);
+
+  modelMatrix.setPerspective(40, vpAspect, 1.0, 100.0)
+
+  modelMatrix.lookAt(cameraX,cameraY,cameraZ,
 					lookX,lookY,lookZ,
 					0,0,1)
 
-// Up // 
-// Down //
-// Left //
-// Right
 
-// W //
-// A //
-// S //
-// D //
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
-  //===========================================================
-  //
   pushMatrix(modelMatrix);     // SAVE world coord system;
-    	//-------Draw Spinning Cylinder:
-    modelMatrix.translate(-0.4,-0.4, 0.0);  // 'set' means DISCARD old matrix,
-    						// (drawing axes centered in CVV), and then make new
-    						// drawing axes moved to the lower-left corner of CVV. 
-    modelMatrix.scale(0.2, 0.2, 0.2);
-    						// if you DON'T scale, cyl goes outside the CVV; clipped!
-    modelMatrix.rotate(currentAngle, 0, 1, 0);  // spin around y axis.
-  	// Drawing:
-    // Pass our current matrix to the vertex shaders:
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-    // Draw the cylinder's vertices, and no other vertices:
-    gl.drawArrays(gl.TRIANGLE_STRIP,				// use this drawing primitive, and
-    							cylStart/floatsPerVertex, // start at this vertex number, and
-    							cylVerts.length/floatsPerVertex);	// draw this many vertices.
-  modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
-  //===========================================================
-  //  
-  pushMatrix(modelMatrix);  // SAVE world drawing coords.
-    //--------Draw Spinning Sphere
-    modelMatrix.translate( 0.4, 0.4, 0.0); // 'set' means DISCARD old matrix,
-    						// (drawing axes centered in CVV), and then make new
-    						// drawing axes moved to the lower-left corner of CVV.
-                          // to match WebGL display canvas.
-    modelMatrix.scale(0.3, 0.3, 0.3);
-    						// Make it smaller:
-    modelMatrix.rotate(currentAngle, 1, 1, 0);  // Spin on XY diagonal axis
-  	// Drawing:		
-  	// Pass our current matrix to the vertex shaders:
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-    		// Draw just the sphere's vertices
-    gl.drawArrays(gl.TRIANGLE_STRIP,				// use this drawing primitive, and
-    							sphStart/floatsPerVertex,	// start at this vertex number, and 
-    							sphVerts.length/floatsPerVertex);	// draw this many vertices.
-  modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
-  
-  //===========================================================
-  //  
-  pushMatrix(modelMatrix);  // SAVE world drawing coords.
-  //--------Draw Spinning torus
-    modelMatrix.translate(-0.4, 0.4, 0.0);	// 'set' means DISCARD old matrix,
-  
-    modelMatrix.scale(0.3, 0.3, 0.3);
-    						// Make it smaller:
-    modelMatrix.rotate(currentAngle, 0, 1, 1);  // Spin on YZ axis
-  	// Drawing:		
-  	// Pass our current matrix to the vertex shaders:
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-    		// Draw just the torus's vertices
-    gl.drawArrays(gl.TRIANGLE_STRIP, 				// use this drawing primitive, and
-    						  torStart/floatsPerVertex,	// start at this vertex number, and
-    						  torVerts.length/floatsPerVertex);	// draw this many vertices.
-  modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
-  //===========================================================
+
+  drawScene(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+
+ //===========================================================
   //
+  modelMatrix = popMatrix(modelMatrix)
+
+  gl.viewport(g_canvas.width/2, 
+	0,													// (x,y) location(in pixels)
+  g_canvas.width/2, 				// viewport width, height.
+  g_canvas.height);
+
+
+  modelMatrix.setOrtho(-vpAspect*2.25, vpAspect*2.25, -2.25, 2.25, 1.0, 100.0);
+
+  modelMatrix.lookAt(cameraX,cameraY,cameraZ,
+					lookX,lookY,lookZ,
+					0,0,1)
+
+
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+  drawScene(gl, n, currentAngle, modelMatrix, u_ModelMatrix)
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+function drawScene(gl, n, currentAngle, modelMatrix, u_ModelMatrix) {
+
+	pushMatrix(modelMatrix);  // SAVE world drawing coords.
+	modelMatrix.translate(0,0,0.2);	
+	modelMatrix.scale(2,2,2);	
+
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.LINES, axesStart/floatsPerVertex, axes.length/floatsPerVertex);
+
+	modelMatrix = popMatrix(modelMatrix)
+
+	pushMatrix(modelMatrix);  // SAVE world drawing coords.
+	modelMatrix.translate( -1, 0, 0);	
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, boxStart/floatsPerVertex, box.length/floatsPerVertex);
+
+	modelMatrix = popMatrix(modelMatrix)
+
+	pushMatrix(modelMatrix);  // SAVE world drawing coords.
+	modelMatrix.translate( 2, -1, 0);	
+	modelMatrix.scale(3, 3, 3);	
+	quatMatrix.setFromQuat(qTot.x, qTot.y, qTot.z, qTot.w);	// Quaternion-->Matrix
+	modelMatrix.concat(quatMatrix);	// apply that matrix.
+
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, satStart/floatsPerVertex, sat.length/floatsPerVertex);
+	modelMatrix.rotate(90, 0, 0, 1); 
+	modelMatrix.translate(0.05,-0.05,0.02)
+	modelMatrix.rotate(g_angle01, 1, 0, 0); 
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, sat2Start/floatsPerVertex, sat2.length/floatsPerVertex);
+	pushMatrix(modelMatrix);
+	modelMatrix.rotate(180,0,0)
+	modelMatrix.translate(-tube3,0,0)
+	modelMatrix.rotate(g_angle01, 1, 0, 0); 
+	modelMatrix.rotate(g_angle01, 1, 0, 0); 
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, sat2Start/floatsPerVertex, sat2.length/floatsPerVertex);
+	modelMatrix.translate(0,tube4,0)
+	modelMatrix.rotate(g_angle01, 1, 0, 0); 
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, sat2Start/floatsPerVertex, sat2.length/floatsPerVertex);
+	modelMatrix = popMatrix();
+	modelMatrix.translate(0,tube2,0)
+	modelMatrix.rotate(g_angle01, 1, 0, 0); 
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, sat2Start/floatsPerVertex, sat2.length/floatsPerVertex);
+	modelMatrix.scale(.3, .3, .3);	
+	gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+	gl.drawArrays(gl.LINES, axesStart/floatsPerVertex, axes.length/floatsPerVertex);
+
+	modelMatrix = popMatrix(modelMatrix)
+
   pushMatrix(modelMatrix);  // SAVE world drawing coords.
   	//---------Draw Ground Plane, without spinning.
   	// position it.
@@ -2358,6 +2671,11 @@ modelMatrix.lookAt(cameraX,cameraY,cameraZ,
 
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_STRIP,	sl5Start/floatsPerVertex, sl5.length/floatsPerVertex);
+
+  modelMatrix.translate(0 , 0 , 0.9 );	
+
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+  gl.drawArrays(gl.LINES, axesStart/floatsPerVertex, axes.length/floatsPerVertex);
 
   modelMatrix = popMatrix();  // RESTORE 'world' drawing coords.
 
@@ -2466,6 +2784,8 @@ function keys(kev) {
 		lookY = lookY - newY*0.3
 	}
 }
+var g_angle01 = 0;                  // initial rotation angle
+var g_angle01Rate = 45.0;  
 
 function animate() {
 //==============================================================================
@@ -2479,13 +2799,13 @@ function animate() {
   if(angle1 < 0 && angle1rate < 0) angle1rate = -angle1rate;
   currentAngle = currentAngle + (ANGLE_STEP * elapsed) / 1000.0; 
   angle1 = angle1 + (angle1rate * elapsed) / 4000.0; 
+  
+  if(g_angle01 >  50.0 && g_angle01Rate > 0) g_angle01Rate = -g_angle01Rate;
+  if(g_angle01 < -40.0 && g_angle01Rate < 0) g_angle01Rate = -g_angle01Rate;
+  g_angle01 = g_angle01 + (g_angle01Rate * 0.3*elapsed) / 1000.0; // rate in degrees/sec
 }
 
 //==================HTML Button Callbacks
-function nextShape() {
-	shapeNum += 1;
-	if(shapeNum >= shapeMax) shapeNum = 0;
-}
 
 function spinDown() {
  ANGLE_STEP -= 25; 
@@ -2589,3 +2909,169 @@ function myKeyDown(kev) {
   
 	  console.log('myKeyUp()--keyCode='+kev.keyCode+' released.');
   }
+
+  function drawResize() {
+	//==============================================================================
+	// Called when user re-sizes their browser window , because our HTML file
+	// contains:  <body onload="main()" onresize="winResize()">
+	
+		//Report our current browser-window contents:
+	
+		console.log('g_Canvas width,height=', g_canvas.width, g_canvas.height);		
+	 	console.log('Browser window: innerWidth,innerHeight=', 
+																	innerWidth, innerHeight);	
+																	// http://www.w3schools.com/jsref/obj_window.asp
+	
+		
+		//Make canvas fill the top 3/4 of our browser window:
+		var xtraMargin = 16;    // keep a margin (otherwise, browser adds scroll-bars)
+		g_canvas.width = innerWidth - xtraMargin;
+		g_canvas.height = (innerHeight*0.7) - xtraMargin;
+		// IMPORTANT!  Need a fresh drawing in the re-sized viewports.
+    drawAll(gl, n, currentAngle, modelMatrix, u_ModelMatrix);   // Draw shapes
+	}
+
+function myMouseDown(ev, gl, canvas) {
+	//==============================================================================
+	// Called when user PRESSES down any mouse button;
+	// 									(Which button?    console.log('ev.button='+ev.button);   )
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
+	
+	// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
+		var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+		var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+		var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+	//  console.log('myMouseDown(pixel coords): xp,yp=\t',xp,',\t',yp);
+		
+		// Convert to Canonical View Volume (CVV) coordinates too:
+		var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+								(canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+									(canvas.height/2);
+	//	console.log('myMouseDown(CVV coords  ):  x, y=\t',x,',\t',y);
+		
+		isDrag = true;											// set our mouse-dragging flag
+		xMclik = x;													// record where mouse-dragging began
+		yMclik = y;
+	};
+	
+	
+	function myMouseMove(ev, gl, canvas) {
+	//==============================================================================
+	// Called when user MOVES the mouse with a button already pressed down.
+	// 									(Which button?   console.log('ev.button='+ev.button);    )
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
+	
+		if(isDrag==false) return;				// IGNORE all mouse-moves except 'dragging'
+	
+		// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
+		var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+		var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+		var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+	//  console.log('myMouseMove(pixel coords): xp,yp=\t',xp,',\t',yp);
+		
+		// Convert to Canonical View Volume (CVV) coordinates too:
+		var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+								(canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+									(canvas.height/2);
+	
+		// find how far we dragged the mouse:
+		xMdragTot += (x - xMclik);					// Accumulate change-in-mouse-position,&
+		yMdragTot += (y - yMclik);
+		// AND use any mouse-dragging we found to update quaternions qNew and qTot.
+		dragQuat(x - xMclik, y - yMclik);
+		
+		xMclik = x;													// Make NEXT drag-measurement from here.
+		yMclik = y;
+		
+		// Show it on our webpage, in the <div> element named 'MouseText':
+		// document.getElementById('MouseText').innerHTML=
+		// 		'Mouse Drag totals (CVV x,y coords):\t'+
+		// 			xMdragTot.toFixed(5)+', \t'+
+		// 			yMdragTot.toFixed(5);	
+	};
+	
+	function myMouseUp(ev, gl, canvas) {
+	//==============================================================================
+	// Called when user RELEASES mouse button pressed previously.
+	// 									(Which button?   console.log('ev.button='+ev.button);    )
+	// 		ev.clientX, ev.clientY == mouse pointer location, but measured in webpage 
+	//		pixels: left-handed coords; UPPER left origin; Y increases DOWNWARDS (!)  
+	
+	// Create right-handed 'pixel' coords with origin at WebGL canvas LOWER left;
+		var rect = ev.target.getBoundingClientRect();	// get canvas corners in pixels
+		var xp = ev.clientX - rect.left;									// x==0 at canvas left edge
+		var yp = canvas.height - (ev.clientY - rect.top);	// y==0 at canvas bottom edge
+	//  console.log('myMouseUp  (pixel coords): xp,yp=\t',xp,',\t',yp);
+		
+		// Convert to Canonical View Volume (CVV) coordinates too:
+		var x = (xp - canvas.width/2)  / 		// move origin to center of canvas and
+								(canvas.width/2);			// normalize canvas to -1 <= x < +1,
+		var y = (yp - canvas.height/2) /		//										 -1 <= y < +1.
+									(canvas.height/2);
+	//	console.log('myMouseUp  (CVV coords  ):  x, y=\t',x,',\t',y);
+		
+		isDrag = false;											// CLEAR our mouse-dragging flag, and
+		// accumulate any final bit of mouse-dragging we did:
+		xMdragTot += (x - xMclik);
+		yMdragTot += (y - yMclik);
+	//	console.log('myMouseUp: xMdragTot,yMdragTot =',xMdragTot,',\t',yMdragTot);
+	
+		// AND use any mouse-dragging we found to update quaternions qNew and qTot;
+		dragQuat(x - xMclik, y - yMclik);
+	
+		// Show it on our webpage, in the <div> element named 'MouseText':
+		// document.getElementById('MouseText').innerHTML=
+		// 		'Mouse Drag totals (CVV x,y coords):\t'+
+		// 			xMdragTot.toFixed(5)+', \t'+
+		// 			yMdragTot.toFixed(5);	
+	};
+	
+	function dragQuat(xdrag, ydrag) {
+	//==============================================================================
+	// Called when user drags mouse by 'xdrag,ydrag' as measured in CVV coords.
+	// We find a rotation axis perpendicular to the drag direction, and convert the 
+	// drag distance to an angular rotation amount, and use both to set the value of 
+	// the quaternion qNew.  We then combine this new rotation with the current 
+	// rotation stored in quaternion 'qTot' by quaternion multiply.  Note the 
+	// 'draw()' function converts this current 'qTot' quaternion to a rotation 
+	// matrix for drawing. 
+		var res = 5;
+		var qTmp = new Quaternion(0,0,0,1);
+		
+		var dist = Math.sqrt(xdrag*xdrag + ydrag*ydrag);
+		// console.log('xdrag,ydrag=',xdrag.toFixed(5),ydrag.toFixed(5),'dist=',dist.toFixed(5));
+		qNew.setFromAxisAngle(-ydrag + 0.0001, xdrag + 0.0001, 0.0, dist*150.0);
+		// (why add tiny 0.0001? To ensure we never have a zero-length rotation axis)
+								// why axis (x,y,z) = (-yMdrag,+xMdrag,0)? 
+								// -- to rotate around +x axis, drag mouse in -y direction.
+								// -- to rotate around +y axis, drag mouse in +x direction.
+								
+		qTmp.multiply(qNew,qTot);			// apply new rotation to current rotation. 
+		//--------------------------
+		// IMPORTANT! Why qNew*qTot instead of qTot*qNew? (Try it!)
+		// ANSWER: Because 'duality' governs ALL transformations, not just matrices. 
+		// If we multiplied in (qTot*qNew) order, we would rotate the drawing axes
+		// first by qTot, and then by qNew--we would apply mouse-dragging rotations
+		// to already-rotated drawing axes.  Instead, we wish to apply the mouse-drag
+		// rotations FIRST, before we apply rotations from all the previous dragging.
+		//------------------------
+		// IMPORTANT!  Both qTot and qNew are unit-length quaternions, but we store 
+		// them with finite precision. While the product of two (EXACTLY) unit-length
+		// quaternions will always be another unit-length quaternion, the qTmp length
+		// may drift away from 1.0 if we repeat this quaternion multiply many times.
+		// A non-unit-length quaternion won't work with our quaternion-to-matrix fcn.
+		// Matrix4.prototype.setFromQuat().
+	//	qTmp.normalize();						// normalize to ensure we stay at length==1.0.
+		qTot.copy(qTmp);
+		// show the new quaternion qTot on our webpage in the <div> element 'QuatValue'
+		// document.getElementById('QuatValue').innerHTML= 
+		// 														'\t X=' +qTot.x.toFixed(res)+
+		// 													'i\t Y=' +qTot.y.toFixed(res)+
+		// 													'j\t Z=' +qTot.z.toFixed(res)+
+		// 													'k\t W=' +qTot.w.toFixed(res)+
+		// 													'<br>length='+qTot.length().toFixed(res);
+	};
