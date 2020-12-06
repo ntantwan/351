@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>JT_Multi-Shader</title>
+  </head>
+
+  <script>
+		function getHeight() {
+      console.log(screen.height)
+			return screen.height;
+    }
+    function getWidth() {
+      console.log(screen.width)
+			return screen.width;
+		}
+	</script>
+
+  <body onload="main()" onresize="drawResize()">
+    <canvas id="webgl" width="getWidth()" height="getHeight()*0.7">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <p>
+      <button type="button" onclick="VBO0toggle()">VBO-0 hide/show</button>
+      <button type="button" onclick="VBO1toggle()">VBO-1 hide/show</button>
+      <button type="button" onclick="VBO2toggle()">VBO-2 hide/show</button>
+      <br><br>
+      <button type="button" onclick="shadeSwitch()">Switch shading mode</button><button type="button" onclick="lightSwitch()">Switch lighting mode</button>
+      <br><br><b style="display:inline;">Current shading/lighting: </b> <div style="display:inline;" id=curShade> </div>, <div style="display:inline;" id=curLight> </div> 
+
+    </p>
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-quat03.js"></script>
+<!-- YOU SHOULD UPGRADE to Brandon Jones' far-faster, 
+      far more complete vector/matrix/quaternion library: (Google it!)
+		<script src="../lib/glmatrix.js"></script>
+--> 
+		<script src="JT_VBObox-Lib.js"></script>
+    <script src="JT_MultiShader.js"></script>
+  </body>
+</html>

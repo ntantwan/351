@@ -1036,6 +1036,12 @@ sl5 = [
 0 , -0.19 , 0.9 , 1 , 0.9647 , 1.0 , 0.0 ,
 ]
 
+console.log(sl1.length)
+console.log(sl2.length)
+console.log(sl3.length)
+console.log(sl4.length)
+console.log(sl5.length)
+
 spiralsq = [
 	0.9004471023526769 , 0.43496553411123023 , 0.45 , 1 , 0.6846 , 0.6286 , 0.4562 ,
 1.4004471023526768 , 0.43496553411123023 , 0.45 , 1 , 0.6302 , 0.7032 , 0.2522 ,
